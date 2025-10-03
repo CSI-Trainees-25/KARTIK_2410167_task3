@@ -1,7 +1,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
+canvas.width = 800;
 canvas.height = window.innerHeight;
 
 let offset = 0; 
@@ -179,12 +179,16 @@ function updateObstacles() {
   
   for (let i = obstacles.length - 1; i >= 0; i--) {
     let obstacle = obstacles[i];
-    obstacle.y += speed * 1.8; 
+    obstacle.y += speed * 1.8;
+    //  if(score > 200 && score < 400){
+    //     obstacle.y += speed * 1.8 * ( Math.floor(score / 100) * 0.5);
+    //   } 
     
      // Check if obstacle has been passed (car is above obstacle)
     if (!passedObstacles.has(obstacle) && obstacle.y > carY + carHeight) {
       passedObstacles.add(obstacle);
-      score += 10; 
+      score += 10;
+     
     }
     
     
@@ -208,6 +212,7 @@ function updateObstacles() {
     if (obstacle.y > canvas.height) {
       obstacles.splice(i, 1);
     }
+   
   }
 }
 
@@ -358,6 +363,7 @@ function gameLoop() {
   ctx.lineTo(roadBottomRight.x, roadBottomRight.y);
   ctx.stroke();
   }
+  
 
   
   if (showBlast) {
