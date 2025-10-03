@@ -10,8 +10,6 @@ const speed = 3;
 function drawRoad() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
- 
  
   // Road edges 
   const roadWidth = canvas.width * 0.6; 
@@ -79,9 +77,9 @@ function drawRoad() {
 
   // lane animation
   for (let i = 0; i < 15; i++) {
-    let t = i * 80 + offset; // spacing between dashes
-    let y = t % canvas.height; // Start from top (0) and go to bottom (canvas.height)
-    let progress = y / canvas.height; // 0 at top, 1 at bottom
+    let t = i * 80 + offset; 
+    let y = t % canvas.height; 
+    let progress = y / canvas.height; 
     
     if (y >= 0 && y <= canvas.height) {
       
@@ -148,30 +146,276 @@ let keys = {};
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
-function gameLoop() {
+// Obstacle setup
+const obstacleImg = new Image();
+obstacleImg.src = "obstacle.png";
+
+let obstacles = [];
+let lastObstacleTime = 0;
+const obstacleInterval = 800; 
+
+function createObstacle() {
+  const now = Date.now();
+  if (now - lastObstacleTime > obstacleInterval) {
+    
+    const lane = Math.floor(Math.random() * 3);
+    
+    // Calculate obstacle position based on lane
+    const roadTopWidth = canvas.width * 0.25;
+    const laneWidth = roadTopWidth / 3;
+    const obstacleX = (canvas.width - roadTopWidth) / 2 + lane * laneWidth + laneWidth / 2;
+    
+    obstacles.push({
+      x: obstacleX,
+      y: 0,
+      lane: lane
+    });
+    
+    lastObstacleTime = now;
+  }
+}
+
+function updateObstacles() {
   
-  drawRoad();
- 
-  // Move car
-  // Calculate road boundaries at car's Y position
-  const carProgress = carY / canvas.height; 
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    let obstacle = obstacles[i];
+    obstacle.y += speed * 1.8; 
+    
+     // Check if obstacle has been passed (car is above obstacle)
+    if (!passedObstacles.has(obstacle) && obstacle.y > carY + carHeight) {
+      passedObstacles.add(obstacle);
+      score += 10; 
+    }
+    
+    
+    let progress = obstacle.y / canvas.height;
+    
+    if (progress <= 1) {
+      
+      const roadWidthBottom = canvas.width * 0.6;
+      const roadWidthTop = canvas.width * 0.25;
+      const roadWidth = roadWidthTop + (roadWidthBottom - roadWidthTop) * progress;
+      
+      const roadLeft = (canvas.width - roadWidth) / 2;
+      const laneWidth = roadWidth / 3;
+      
+      obstacle.x = roadLeft + obstacle.lane * laneWidth + laneWidth / 2 - obstacle.width / 2;
+      obstacle.width = canvas.width * 0.08 * (0.5 + progress * 0.5); // Scale with perspective
+      obstacle.height = obstacle.width;
+    }
+    
+    // Remove obstacles that are off screen
+    if (obstacle.y > canvas.height) {
+      obstacles.splice(i, 1);
+    }
+  }
+}
 
-  const roadWidth = canvas.width * 0.6; 
+function drawObstacles() {
+  for (let obstacle of obstacles) {
+    if (obstacleImg.complete) {
+      ctx.drawImage(obstacleImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    } 
+  }
+}
+
+
+// Collision and game state
+let gameOver = false;
+let showBlast = false;
+let blastStartTime = 0;
+
+const blastImg = new Image();
+blastImg.src = "blast.png";
+
+function checkCollision() {
+  if (gameOver) return;
+  
+  for (let obstacle of obstacles) {
+    
+    if (carX < obstacle.x + obstacle.width &&
+        carX + carWidth > obstacle.x &&
+        carY < obstacle.y + obstacle.height &&
+        carY + carHeight > obstacle.y) {
+      
+      // Collision detected!
+      gameOver = true;
+      showBlast = true;
+      blastStartTime = Date.now();
+     
+      obstacles = [];
+      
+      break; 
+    }
+  }
+}
+
+
+
+// Score system
+let score = 0;
+let passedObstacles = new Set(); 
+
+function drawScore() {
+  // Position score at top center of the road
   const roadTopWidth = canvas.width * 0.25;
+  const scoreX = canvas.width / 2;
+  const scoreY = 50;
+  
+  // Draw score background
+  ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+  ctx.fillRect(scoreX - 80, scoreY - 30, 160, 40);
+  
+  // Draw score text
+  ctx.fillStyle = "white";
+  ctx.font = "24px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(`Score: ${score}`, scoreX, scoreY);
+}
 
-  //  road width at car's position
-  const roadWidthAtCar = roadTopWidth + (roadWidth - roadTopWidth) * carProgress;
+function gameLoop() {
+  if (!gameOver) {
+    drawRoad();
+    
+    
+    createObstacle();
+    updateObstacles();
+    
+    const carProgress = carY / canvas.height; 
+    const roadWidth = canvas.width * 0.6; 
+    const roadTopWidth = canvas.width * 0.25;
+    const roadWidthAtCar = roadTopWidth + (roadWidth - roadTopWidth) * carProgress;
+    const roadLeftAtCar = (canvas.width - roadWidthAtCar) / 2 - 20;
+    const roadRightAtCar = (canvas.width + roadWidthAtCar) / 2 + 20;
 
-  //  left and right boundaries at car's position
-  const roadLeftAtCar = (canvas.width - roadWidthAtCar) / 2 - 20;
-  const roadRightAtCar = (canvas.width + roadWidthAtCar) / 2 + 20;
+    if (keys["ArrowLeft"] && carX > roadLeftAtCar) carX -= carSpeed;
+    if (keys["ArrowRight"] && carX + carWidth < roadRightAtCar) carX += carSpeed;
 
-  if (keys["ArrowLeft"] && carX > roadLeftAtCar) carX -= carSpeed;
-  if (keys["ArrowRight"] && carX + carWidth < roadRightAtCar) carX += carSpeed;
+   
+    checkCollision();
+    
+   
+    drawObstacles();
 
-  // Draw car
-  if (carImg.complete) ctx.drawImage(carImg, carX, carY, carWidth, carHeight);
+    drawScore();
+  } else {
+    // drawRoad();
+   
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw static road (without moving lane markings)
+    const roadWidth = canvas.width * 0.6; 
+    const roadTopWidth = canvas.width * 0.25; 
+    const roadBottomLeft = {x: (canvas.width - roadWidth) / 2, y: canvas.height};
+    const roadBottomRight = {x: (canvas.width + roadWidth) / 2, y: canvas.height};
+    const roadTopLeft = {x: (canvas.width - roadTopWidth) / 2, y: 0};
+    const roadTopRight = {x: (canvas.width + roadTopWidth) / 2, y: 0};
+
+    // Draw road surface
+    ctx.beginPath();
+    ctx.moveTo(roadTopLeft.x, roadTopLeft.y);
+    ctx.lineTo(roadTopRight.x, roadTopRight.y);
+    ctx.lineTo(roadBottomRight.x, roadBottomRight.y);
+    ctx.lineTo(roadBottomLeft.x, roadBottomLeft.y);
+    ctx.closePath();
+    ctx.fillStyle = "#444";
+    ctx.fill();
+
+      // Grass left
+  ctx.fillStyle = "green";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(roadTopLeft.x, roadTopLeft.y);
+  ctx.lineTo(roadBottomLeft.x, roadBottomLeft.y);
+  ctx.lineTo(0, canvas.height);
+  ctx.closePath();
+  ctx.fill();
+
+  // Grass right
+ 
+  ctx.beginPath();
+  ctx.moveTo(canvas.width, 0);
+  ctx.lineTo(roadTopRight.x, roadTopRight.y);
+  ctx.lineTo(roadBottomRight.x, roadBottomRight.y);
+  ctx.lineTo(canvas.width, canvas.height);
+  ctx.closePath();
+   ctx.fillStyle = "green";
+  ctx.fill();
+
+   // edge lines
+  ctx.strokeStyle = "yellow";
+  ctx.lineWidth = 2;
+  
+  // Left edge line
+  ctx.beginPath();
+  ctx.moveTo(roadTopLeft.x, roadTopLeft.y);
+  ctx.lineTo(roadBottomLeft.x, roadBottomLeft.y);
+  ctx.stroke();
+  
+  // Right edge line
+  ctx.beginPath();
+  ctx.moveTo(roadTopRight.x, roadTopRight.y);
+  ctx.lineTo(roadBottomRight.x, roadBottomRight.y);
+  ctx.stroke();
+  }
+
+  
+  if (showBlast) {
+   
+    if (Date.now() - blastStartTime < 500) {
+      if (blastImg.complete) {
+        ctx.drawImage(blastImg, carX, carY, carWidth, carHeight);
+      } 
+    } else {
+      showBlast = false; 
+    }
+  } else if (!gameOver) {
+    
+    if (carImg.complete) ctx.drawImage(carImg, carX, carY, carWidth, carHeight);
+  }
+
+  
+  if (gameOver && !showBlast) {
+    drawRoad();
+    //  drawScore();
+
+    ctx.fillStyle = "red";
+    ctx.font = "48px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+    
+    ctx.fillStyle = "yellow";
+    ctx.font = "48px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("SCORE : " + score, canvas.width / 2, canvas.height / 2 + 50);
+
+    ctx.fillStyle = "white";
+    ctx.font = "24px Arial";
+    ctx.fillText("Press R to Restart", canvas.width / 2, canvas.height / 2 + 100);
+  }
+  
   requestAnimationFrame(gameLoop);
 }
+
+
+document.addEventListener("keydown", e => {
+  keys[e.key] = true;
+  
+  // Restart game when R is pressed
+  if (e.key === 'r' || e.key === 'R') {
+    if (gameOver) {
+      // Reset game data
+      gameOver = false;
+      showBlast = false;
+      obstacles = [];
+      passedObstacles.clear();
+      score = 0;
+      carX = canvas.width / 2 - carWidth / 2;
+      offset = 0;
+      lastObstacleTime = 0;
+    }
+  }
+});
+
  gameLoop();
 
