@@ -1,24 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>3D Endless Road</title>
-  <style>
-    canvas { background: skyblue; display: block; margin: auto; }
-    body { 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      height: 100vh; 
-      margin: 0; 
-      background: #222;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background: #222;
+        }
+        canvas { background: skyblue; display: block; margin: auto; }
+    </style>
 </head>
 <body>
-
-
-
-<canvas id="gameCanvas" ></canvas>
-<script src="canvas.js"></script>
+<div class ="start-screen" style="position: relative; width: 100%; height: 100%; background-color: green;">
+    <img src = "logo4.png" alt="Game Logo" style="position: absolute; top: .1%; left: 65%; transform: translateX(-50%); z-index: 10; width: 50rem; height: 25rem;">
+    <a href = "game.html" >
+    <img src="start.png" alt="Start Screen" style="position: absolute; top: 50%; left: 60%; transform: translate(-50%, -50%); z-index: 10;">
+</a>
+    </div>
+    <img src = "left.png" alt="Left Side Decoration" style="position: absolute; transform: rotate(90deg); top: 86%; left: 65%; transform: translateY(-50%); z-index: 50; height: 10vh; width: auto;">
+    <img src = "right.png" alt="Right Side Decoration" style="position: absolute; top: 86%; left: 78%; transform: translateY(-50%); z-index: 5; height: 10vh; width: auto;">
+    <canvas id="gameCanvas"></canvas>
+    <script src="script.js"></script>
 </body>
 </html>

@@ -152,7 +152,7 @@ obstacleImg.src = "obstacle.png";
 
 let obstacles = [];
 let lastObstacleTime = 0;
-const obstacleInterval = 800; 
+const obstacleInterval = 700; 
 
 function createObstacle() {
   const now = Date.now();
@@ -204,7 +204,7 @@ function updateObstacles() {
       const laneWidth = roadWidth / 3;
       
       obstacle.x = roadLeft + obstacle.lane * laneWidth + laneWidth / 2 - obstacle.width / 2;
-      obstacle.width = canvas.width * 0.08 * (0.5 + progress * 0.5); // Scale with perspective
+      obstacle.width = canvas.width * 0.06 * (0.5 + progress * 0.5); 
       obstacle.height = obstacle.width;
     }
     
@@ -220,7 +220,7 @@ function drawObstacles() {
   for (let obstacle of obstacles) {
     if (obstacleImg.complete) {
       ctx.drawImage(obstacleImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-    } 
+    }
   }
 }
 
@@ -256,6 +256,85 @@ function checkCollision() {
 }
 
 
+// coin setup
+const coinImg = new Image();
+coinImg.src = "coin.png";
+
+let coins = [];
+let lastCoinTime = 0;
+const coinInterval = 4700;
+
+function createCoin() {
+  const now = Date.now();
+  if (now - lastCoinTime > coinInterval) {
+
+    const lane = Math.floor(Math.random() * 3);
+
+    // Calculate coin position based on lane
+    const roadTopWidth = canvas.width * 0.25;
+    const laneWidth = roadTopWidth / 3;
+    const coinX = (canvas.width - roadTopWidth) / 2 + lane * laneWidth + laneWidth / 2;
+
+    coins.push({
+      x: coinX,
+      y: 0,
+      lane: lane
+    });
+
+    lastCoinTime = now;
+  }
+}
+let passedCoins = new Set(); // Add this line
+function updateCoins() {
+
+  for (let i = coins.length - 1; i >= 0; i--) {
+    let coin = coins[i];
+    coin.y += speed * 1.8;
+    //  if(score > 200 && score < 400){
+    //     obstacle.y += speed * 1.8 * ( Math.floor(score / 100) * 0.5);
+    //   }
+
+     // Check if coin has been passed (car is above coin)
+    if (!passedCoins.has(coin) && coin.y > carY + carHeight) {
+      passedCoins.add(coin);
+      score += 10;
+     
+    }
+
+
+    let progress = coin.y / canvas.height;
+
+    if (progress <= 1) {
+      
+      const roadWidthBottom = canvas.width * 0.6;
+      const roadWidthTop = canvas.width * 0.25;
+      const roadWidth = roadWidthTop + (roadWidthBottom - roadWidthTop) * progress;
+      
+      const roadLeft = (canvas.width - roadWidth) / 2;
+      const laneWidth = roadWidth / 3;
+
+      coin.x = roadLeft + coin.lane * laneWidth + laneWidth / 2 - coin.width / 2;
+      coin.width = canvas.width * 0.06 * (0.5 + progress * 0.5);
+      coin.height = coin.width;
+    }
+    
+    // Remove coins that are off screen
+    if (coin.y > canvas.height) {
+      coins.splice(i, 1);
+    }
+   
+  }
+}
+
+function drawCoins() {
+  for (let coin of coins) {
+    if (coinImg.complete) {
+      ctx.drawImage(coinImg, coin.x, coin.y, coin.width, coin.height);
+    }
+  }
+}
+
+
 
 // Score system
 let score = 0;
@@ -278,6 +357,30 @@ function drawScore() {
   ctx.fillText(`Score: ${score}`, scoreX, scoreY);
 }
 
+function checkCoinCollision() {
+  if (gameOver) return;
+
+  for (let coin of coins) {
+
+    if (carX < coin.x + coin.width &&
+        carX + carWidth > coin.x &&
+        carY < coin.y + coin.height &&
+        carY + carHeight > coin.y) {
+
+      // Collision detected!
+      
+      score += 50; // Increase score by 50 for collecting a coin
+      coins.splice(coins.indexOf(coin), 1);
+      passedCoins.delete(coin); 
+
+      coins = [];
+
+      break;
+    }
+  }
+}
+
+
 function gameLoop() {
   if (!gameOver) {
     drawRoad();
@@ -285,6 +388,8 @@ function gameLoop() {
     
     createObstacle();
     updateObstacles();
+    createCoin();
+    updateCoins();
     
     const carProgress = carY / canvas.height; 
     const roadWidth = canvas.width * 0.6; 
@@ -298,9 +403,10 @@ function gameLoop() {
 
    
     checkCollision();
-    
+    checkCoinCollision();
    
     drawObstacles();
+    drawCoins();
 
     drawScore();
   } else {
@@ -415,6 +521,8 @@ document.addEventListener("keydown", e => {
       showBlast = false;
       obstacles = [];
       passedObstacles.clear();
+      coins = [];
+      passedCoins.clear();
       score = 0;
       carX = canvas.width / 2 - carWidth / 2;
       offset = 0;
