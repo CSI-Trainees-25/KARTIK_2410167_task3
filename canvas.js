@@ -139,10 +139,10 @@ carImg.src = "car2.png";
 let carWidth = canvas.width * 0.2, carHeight = canvas.width * 0.15;
 let carX = canvas.width / 2 - carWidth / 2;
 let carY = canvas.height - carHeight - 40;
-let carSpeed = 10;
+let carSpeed = 5;
 
 
-// 
+// // 
 let keys = {};
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
@@ -182,12 +182,9 @@ function updateObstacles() {
   
   for (let i = obstacles.length - 1; i >= 0; i--) {
     let obstacle = obstacles[i];
-    obstacle.y += speed * 4.0;
-    //  if(score > 200 && score < 400){
-    //     obstacle.y += speed * 1.8 * ( Math.floor(score / 100) * 0.5);
-    //   } 
-    
-     // Check if obstacle has been passed (car is above obstacle)
+    let obstacleSpeed = 8 + (Math.floor(score / 300) * 2);
+    obstacle.y += obstacleSpeed;
+  
     if (!passedObstacles.has(obstacle) && obstacle.y > carY + carHeight) {
       passedObstacles.add(obstacle);
       score += 10;
@@ -207,11 +204,11 @@ function updateObstacles() {
       const laneWidth = roadWidth / 3;
       
       obstacle.x = roadLeft + obstacle.lane * laneWidth + laneWidth / 2 - obstacle.width / 2;
-      obstacle.width = canvas.width * 0.06 * (0.5 + progress * 0.5); 
+      obstacle.width = canvas.width * 0.06 * (0.5 + progress * 0.5); // Scale with perspective
       obstacle.height = obstacle.width;
     }
     
-    // Remove obstacles that are off screen
+   
     if (obstacle.y > canvas.height) {
       obstacles.splice(i, 1);
     }
@@ -295,11 +292,7 @@ function updateCoins() {
   for (let i = coins.length - 1; i >= 0; i--) {
     let coin = coins[i];
     coin.y += speed * 2.8;
-    //  if(score > 200 && score < 400){
-    //     obstacle.y += speed * 1.8 * ( Math.floor(score / 100) * 0.5);
-    //   }
-
-     // Check if coin has been passed (car is above coin)
+    
     if (!passedCoins.has(coin) && coin.y > carY + carHeight) {
       passedCoins.add(coin);
       score += 10;
@@ -360,6 +353,16 @@ function drawScore() {
   ctx.font = "24px Arial";
   ctx.textAlign = "center";
   ctx.fillText(`Score: ${score}`, scoreX, scoreY);
+
+    // Highest score using Math.max
+  let highestScore = parseInt(localStorage.getItem('highestScore')) || 0;
+  highestScore = Math.max(highestScore, score);
+  localStorage.setItem('highestScore', highestScore);
+  
+  ctx.fillStyle = "white";
+  ctx.font = "18px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(`Highest Score: ${highestScore}`, 100, 25);
 }
 
 function checkCoinCollision() {
@@ -400,6 +403,9 @@ function gameLoop() {
     const roadWidthAtCar = roadTopWidth + (roadWidth - roadTopWidth) * carProgress;
     const roadLeftAtCar = (canvas.width - roadWidthAtCar) / 2 - 20;
     const roadRightAtCar = (canvas.width + roadWidthAtCar) / 2 + 20;
+
+    // Update car speed based on score
+    carSpeed = 10 + (Math.floor(score / 200) * 2);
 
     if (keys["ArrowLeft"] && carX > roadLeftAtCar) carX -= carSpeed;
     if (keys["ArrowRight"] && carX + carWidth < roadRightAtCar) carX += carSpeed;
@@ -508,6 +514,12 @@ function gameLoop() {
     ctx.font = "24px Arial";
     ctx.fillText("Press R to Restart", canvas.width / 2, canvas.height / 2 + 100);
   }
+  if (!gameStarted && !gameOver) {
+     ctx.fillStyle = "yellow";
+    ctx.font = "48px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Press any key to Start", canvas.width / 2, canvas.height / 2 + 50);
+  }
   
   requestAnimationFrame(gameLoop);
 }
@@ -533,6 +545,7 @@ document.addEventListener("keydown", e => {
       passedCoins.clear();
       score = 0;
       carX = canvas.width / 2 - carWidth / 2;
+      carSpeed = 10; 
       offset = 0;
       lastObstacleTime = 0;
     }
