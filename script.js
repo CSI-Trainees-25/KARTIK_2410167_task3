@@ -146,7 +146,7 @@ carImg.src = "car2.png";
 let carWidth = canvas.width * 0.2, carHeight = canvas.width * 0.15;
 let carX = canvas.width / 2 - carWidth / 2;
 let carY = canvas.height - carHeight - 40;
-let carSpeed = 5;
+let carSpeed = 15;
 
 
 // 

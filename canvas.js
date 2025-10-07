@@ -6,6 +6,7 @@ canvas.height = window.innerHeight;
 
 let offset = 0; 
 const speed = 3;
+let gameStarted = false;
 
 function drawRoad() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -138,7 +139,7 @@ carImg.src = "car2.png";
 let carWidth = canvas.width * 0.2, carHeight = canvas.width * 0.15;
 let carX = canvas.width / 2 - carWidth / 2;
 let carY = canvas.height - carHeight - 40;
-let carSpeed = 5;
+let carSpeed = 10;
 
 
 // 
@@ -152,9 +153,11 @@ obstacleImg.src = "obstacle.png";
 
 let obstacles = [];
 let lastObstacleTime = 0;
-const obstacleInterval = 700; 
+const obstacleInterval = 800; 
 
 function createObstacle() {
+  if(!gameStarted) return;
+
   const now = Date.now();
   if (now - lastObstacleTime > obstacleInterval) {
     
@@ -179,7 +182,7 @@ function updateObstacles() {
   
   for (let i = obstacles.length - 1; i >= 0; i--) {
     let obstacle = obstacles[i];
-    obstacle.y += speed * 1.8;
+    obstacle.y += speed * 4.0;
     //  if(score > 200 && score < 400){
     //     obstacle.y += speed * 1.8 * ( Math.floor(score / 100) * 0.5);
     //   } 
@@ -265,6 +268,8 @@ let lastCoinTime = 0;
 const coinInterval = 4700;
 
 function createCoin() {
+  if(!gameStarted) return;
+
   const now = Date.now();
   if (now - lastCoinTime > coinInterval) {
 
@@ -289,7 +294,7 @@ function updateCoins() {
 
   for (let i = coins.length - 1; i >= 0; i--) {
     let coin = coins[i];
-    coin.y += speed * 1.8;
+    coin.y += speed * 2.8;
     //  if(score > 200 && score < 400){
     //     obstacle.y += speed * 1.8 * ( Math.floor(score / 100) * 0.5);
     //   }
@@ -367,8 +372,6 @@ function checkCoinCollision() {
         carY < coin.y + coin.height &&
         carY + carHeight > coin.y) {
 
-      // Collision detected!
-      
       score += 50; // Increase score by 50 for collecting a coin
       coins.splice(coins.indexOf(coin), 1);
       passedCoins.delete(coin); 
@@ -512,11 +515,16 @@ function gameLoop() {
 
 document.addEventListener("keydown", e => {
   keys[e.key] = true;
+
+   if (!gameStarted && !gameOver) {
+    gameStarted = true;
+  }
   
   // Restart game when R is pressed
   if (e.key === 'r' || e.key === 'R') {
     if (gameOver) {
       // Reset game data
+      gameStarted = false;
       gameOver = false;
       showBlast = false;
       obstacles = [];
@@ -532,4 +540,3 @@ document.addEventListener("keydown", e => {
 });
 
  gameLoop();
-
