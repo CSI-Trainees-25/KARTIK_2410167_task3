@@ -146,10 +146,8 @@ carImg.src = "car2.png";
 let carWidth = canvas.width * 0.2, carHeight = canvas.width * 0.15;
 let carX = canvas.width / 2 - carWidth / 2;
 let carY = canvas.height - carHeight - 40;
-let carSpeed = 15;
+let carSpeed = 8;
 
-
-// 
 let keys = {};
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
@@ -158,8 +156,7 @@ function gameLoop() {
   
   drawRoad();
  
-  // Move car
-  // Calculate road boundaries at car's Y position
+
   const carProgress = carY / canvas.height; 
 
   const roadWidth = canvas.width * 0.6; 
@@ -168,7 +165,7 @@ function gameLoop() {
   //  road width at car's position
   const roadWidthAtCar = roadTopWidth + (roadWidth - roadTopWidth) * carProgress;
 
-  //  left and right boundaries at car's position
+
   const roadLeftAtCar = (canvas.width - roadWidthAtCar) / 2 - 20;
   const roadRightAtCar = (canvas.width + roadWidthAtCar) / 2 + 20;
 

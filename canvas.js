@@ -182,7 +182,7 @@ function updateObstacles() {
   
   for (let i = obstacles.length - 1; i >= 0; i--) {
     let obstacle = obstacles[i];
-    let obstacleSpeed = 8 + (Math.floor(score / 300) * 2);
+    let obstacleSpeed = 4 + (Math.floor(score / 300) * 2);
     obstacle.y += obstacleSpeed;
   
     if (!passedObstacles.has(obstacle) && obstacle.y > carY + carHeight) {
@@ -291,7 +291,7 @@ function updateCoins() {
 
   for (let i = coins.length - 1; i >= 0; i--) {
     let coin = coins[i];
-    coin.y += speed * 2.8;
+    coin.y += speed * 1.8;
     
     if (!passedCoins.has(coin) && coin.y > carY + carHeight) {
       passedCoins.add(coin);
@@ -405,7 +405,7 @@ function gameLoop() {
     const roadRightAtCar = (canvas.width + roadWidthAtCar) / 2 + 20;
 
     // Update car speed based on score
-    carSpeed = 10 + (Math.floor(score / 200) * 2);
+    carSpeed = 4 + (Math.floor(score / 200) * 2);
 
     if (keys["ArrowLeft"] && carX > roadLeftAtCar) carX -= carSpeed;
     if (keys["ArrowRight"] && carX + carWidth < roadRightAtCar) carX += carSpeed;
