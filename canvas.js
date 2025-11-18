@@ -182,7 +182,7 @@ function updateObstacles() {
   
   for (let i = obstacles.length - 1; i >= 0; i--) {
     let obstacle = obstacles[i];
-    let obstacleSpeed = 4 + (Math.floor(score / 300) * 2);
+    let obstacleSpeed = 6 + (Math.floor(score / 300) * 2);
     obstacle.y += obstacleSpeed;
   
     if (!passedObstacles.has(obstacle) && obstacle.y > carY + carHeight) {
