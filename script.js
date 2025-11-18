@@ -107,14 +107,14 @@ function drawRoad() {
       ctx.lineWidth = Math.max(1, 4 * progress); // thicker as it comes toward us
       ctx.beginPath();
       ctx.moveTo(leftDividerX, y);
-      ctx.lineTo(leftDividerX, y + 25 * progress); // dash length based on perspective
+      ctx.lineTo(leftDividerX, y + 25 * progress); 
       ctx.stroke();
       
       //  ( lane between lane 2 and 3)
       let rightDividerX = roadLeft + 2 * laneWidth;
       ctx.beginPath();
       ctx.moveTo(rightDividerX, y);
-      ctx.lineTo(rightDividerX, y + 25 * progress); // dash length based on perspective
+      ctx.lineTo(rightDividerX, y + 25 * progress); 
       ctx.stroke();
     }
   }
@@ -135,18 +135,19 @@ function drawRoad() {
   ctx.lineTo(roadBottomRight.x, roadBottomRight.y);
   ctx.stroke();
 
-  // 
+  
   offset += speed;
   if (offset > 80) offset = 0;
 }
 
 const carImg = new Image();
 carImg.src = "car2.png";
+
 // Car setup
 let carWidth = canvas.width * 0.2, carHeight = canvas.width * 0.15;
 let carX = canvas.width / 2 - carWidth / 2;
 let carY = canvas.height - carHeight - 40;
-let carSpeed = 8;
+let carSpeed = 6;
 
 let keys = {};
 document.addEventListener("keydown", e => keys[e.key] = true);

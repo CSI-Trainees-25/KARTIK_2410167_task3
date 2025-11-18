@@ -4,8 +4,8 @@ const ctx = canvas.getContext("2d");
 canvas.width = 800;
 canvas.height = window.innerHeight;
 
-let offset = 0; 
 const speed = 3;
+let offset = 0; 
 let gameStarted = false;
 
 function drawRoad() {
@@ -76,7 +76,7 @@ function drawRoad() {
   ctx.strokeStyle = "white";
   
 
-  // lane animation
+  // lane moving
   for (let i = 0; i < 15; i++) {
     let t = i * 80 + offset; 
     let y = t % canvas.height; 
@@ -92,22 +92,22 @@ function drawRoad() {
       let roadLeftTop = roadTopLeft.x;
       let roadLeft = roadLeftTop + (roadLeftBottom - roadLeftTop) * progress;
       
-      // Draw 2 lane dividers to create 3 lanes
+      //  3 lanes
       let laneWidth = roadWidth / 3;
       
       //  (lane between lane 1 and 2)
       let leftDividerX = roadLeft + laneWidth;
-      ctx.lineWidth = Math.max(1, 4 * progress); // thicker as it comes toward us
+      ctx.lineWidth = Math.max(1, 4 * progress); 
       ctx.beginPath();
       ctx.moveTo(leftDividerX, y);
-      ctx.lineTo(leftDividerX, y + 25 * progress); // dash length based on perspective
+      ctx.lineTo(leftDividerX, y + 25 * progress);
       ctx.stroke();
       
       //  ( lane between lane 2 and 3)
       let rightDividerX = roadLeft + 2 * laneWidth;
       ctx.beginPath();
       ctx.moveTo(rightDividerX, y);
-      ctx.lineTo(rightDividerX, y + 25 * progress); // dash length based on perspective
+      ctx.lineTo(rightDividerX, y + 25 * progress); 
       ctx.stroke();
     }
   }
@@ -128,7 +128,6 @@ function drawRoad() {
   ctx.lineTo(roadBottomRight.x, roadBottomRight.y);
   ctx.stroke();
 
-  // 
   offset += speed;
   if (offset > 80) offset = 0;
 }
@@ -141,8 +140,6 @@ let carX = canvas.width / 2 - carWidth / 2;
 let carY = canvas.height - carHeight - 40;
 let carSpeed = 5;
 
-
-// // 
 let keys = {};
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
@@ -163,7 +160,7 @@ function createObstacle() {
     
     const lane = Math.floor(Math.random() * 3);
     
-    // Calculate obstacle position based on lane
+    
     const roadTopWidth = canvas.width * 0.25;
     const laneWidth = roadTopWidth / 3;
     const obstacleX = (canvas.width - roadTopWidth) / 2 + lane * laneWidth + laneWidth / 2;
@@ -182,7 +179,7 @@ function updateObstacles() {
   
   for (let i = obstacles.length - 1; i >= 0; i--) {
     let obstacle = obstacles[i];
-    let obstacleSpeed = 4 + (Math.floor(score / 300) * 2);
+    let obstacleSpeed = 7 + (Math.floor(score / 300) * 2);
     obstacle.y += obstacleSpeed;
   
     if (!passedObstacles.has(obstacle) && obstacle.y > carY + carHeight) {
@@ -204,7 +201,7 @@ function updateObstacles() {
       const laneWidth = roadWidth / 3;
       
       obstacle.x = roadLeft + obstacle.lane * laneWidth + laneWidth / 2 - obstacle.width / 2;
-      obstacle.width = canvas.width * 0.06 * (0.5 + progress * 0.5); // Scale with perspective
+      obstacle.width = canvas.width * 0.06 * (0.5 + progress * 0.5); 
       obstacle.height = obstacle.width;
     }
     
@@ -225,7 +222,7 @@ function drawObstacles() {
 }
 
 
-// Collision and game state
+// Collision 
 let gameOver = false;
 let showBlast = false;
 let blastStartTime = 0;
@@ -272,7 +269,7 @@ function createCoin() {
 
     const lane = Math.floor(Math.random() * 3);
 
-    // Calculate coin position based on lane
+    
     const roadTopWidth = canvas.width * 0.25;
     const laneWidth = roadTopWidth / 3;
     const coinX = (canvas.width - roadTopWidth) / 2 + lane * laneWidth + laneWidth / 2;
@@ -286,7 +283,7 @@ function createCoin() {
     lastCoinTime = now;
   }
 }
-let passedCoins = new Set(); // Add this line
+let passedCoins = new Set(); 
 function updateCoins() {
 
   for (let i = coins.length - 1; i >= 0; i--) {
@@ -316,7 +313,7 @@ function updateCoins() {
       coin.height = coin.width;
     }
     
-    // Remove coins that are off screen
+   
     if (coin.y > canvas.height) {
       coins.splice(i, 1);
     }
@@ -339,22 +336,22 @@ let score = 0;
 let passedObstacles = new Set(); 
 
 function drawScore() {
-  // Position score at top center of the road
+ 
   const roadTopWidth = canvas.width * 0.25;
   const scoreX = canvas.width / 2;
   const scoreY = 50;
   
-  // Draw score background
+  
   ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
   ctx.fillRect(scoreX - 80, scoreY - 30, 160, 40);
   
-  // Draw score text
+ 
   ctx.fillStyle = "white";
   ctx.font = "24px Arial";
   ctx.textAlign = "center";
   ctx.fillText(`Score: ${score}`, scoreX, scoreY);
 
-    // Highest score using Math.max
+    // Highest score 
   let highestScore = parseInt(localStorage.getItem('highestScore')) || 0;
   highestScore = Math.max(highestScore, score);
   localStorage.setItem('highestScore', highestScore);
@@ -404,8 +401,8 @@ function gameLoop() {
     const roadLeftAtCar = (canvas.width - roadWidthAtCar) / 2 - 20;
     const roadRightAtCar = (canvas.width + roadWidthAtCar) / 2 + 20;
 
-    // Update car speed based on score
-    carSpeed = 4 + (Math.floor(score / 200) * 2);
+    // Update car speed
+    carSpeed = 5 + (Math.floor(score / 200) * 2);
 
     if (keys["ArrowLeft"] && carX > roadLeftAtCar) carX -= carSpeed;
     if (keys["ArrowRight"] && carX + carWidth < roadRightAtCar) carX += carSpeed;
@@ -419,11 +416,11 @@ function gameLoop() {
 
     drawScore();
   } else {
-    // drawRoad();
+  
    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw static road (without moving lane markings)
+    
     const roadWidth = canvas.width * 0.6; 
     const roadTopWidth = canvas.width * 0.25; 
     const roadBottomLeft = {x: (canvas.width - roadWidth) / 2, y: canvas.height};
@@ -431,7 +428,6 @@ function gameLoop() {
     const roadTopLeft = {x: (canvas.width - roadTopWidth) / 2, y: 0};
     const roadTopRight = {x: (canvas.width + roadTopWidth) / 2, y: 0};
 
-    // Draw road surface
     ctx.beginPath();
     ctx.moveTo(roadTopLeft.x, roadTopLeft.y);
     ctx.lineTo(roadTopRight.x, roadTopRight.y);
@@ -532,10 +528,10 @@ document.addEventListener("keydown", e => {
     gameStarted = true;
   }
   
-  // Restart game when R is pressed
+  // Restart game 
   if (e.key === 'r' || e.key === 'R') {
     if (gameOver) {
-      // Reset game data
+     
       gameStarted = false;
       gameOver = false;
       showBlast = false;
