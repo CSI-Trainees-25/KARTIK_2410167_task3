@@ -401,11 +401,9 @@ function gameLoop() {
     const roadLeftAtCar = (canvas.width - roadWidthAtCar) / 2 - 20;
     const roadRightAtCar = (canvas.width + roadWidthAtCar) / 2 + 20;
 
-<<<<<<< HEAD
-    // Update car speed
-=======
+
     // Update car speed based on score
->>>>>>> 1ed9d2bdbc19d1c27d05a7536ecbb3a7bedd6797
+
     carSpeed = 5 + (Math.floor(score / 200) * 2);
 
     if (keys["ArrowLeft"] && carX > roadLeftAtCar) carX -= carSpeed;
